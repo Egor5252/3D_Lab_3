@@ -10,3 +10,4 @@ int main(array<String^>^ args) {
 	My3DLab3::MyForm form;
 	System::Windows::Forms::Application::Run(% form);
 }
+

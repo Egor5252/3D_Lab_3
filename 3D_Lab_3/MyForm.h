@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <cmath>
 
 struct Dot2D {
 	int x, y;
@@ -59,6 +60,7 @@ namespace My3DLab3 {
 	private: System::Windows::Forms::Button^ ColorPickBtn;
 	private: System::Windows::Forms::Button^ Make3DBtn;
 	private: System::Windows::Forms::ColorDialog^ Color2D;
+	private: System::Windows::Forms::Button^ button1;
 
 
 
@@ -86,6 +88,7 @@ namespace My3DLab3 {
 			this->Deg3D = (gcnew System::Windows::Forms::NumericUpDown());
 			this->ColorPickBtn = (gcnew System::Windows::Forms::Button());
 			this->Make3DBtn = (gcnew System::Windows::Forms::Button());
+			this->button1 = (gcnew System::Windows::Forms::Button());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->Box3D))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->Box2D))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->pictureBox1))->BeginInit();
@@ -97,16 +100,16 @@ namespace My3DLab3 {
 			this->Box3D->BorderStyle = System::Windows::Forms::BorderStyle::FixedSingle;
 			this->Box3D->Location = System::Drawing::Point(12, 12);
 			this->Box3D->Name = L"Box3D";
-			this->Box3D->Size = System::Drawing::Size(713, 380);
+			this->Box3D->Size = System::Drawing::Size(713, 330);
 			this->Box3D->TabIndex = 0;
 			this->Box3D->TabStop = false;
 			// 
 			// Box2D
 			// 
 			this->Box2D->BorderStyle = System::Windows::Forms::BorderStyle::FixedSingle;
-			this->Box2D->Location = System::Drawing::Point(12, 398);
+			this->Box2D->Location = System::Drawing::Point(12, 348);
 			this->Box2D->Name = L"Box2D";
-			this->Box2D->Size = System::Drawing::Size(713, 137);
+			this->Box2D->Size = System::Drawing::Size(713, 187);
 			this->Box2D->TabIndex = 1;
 			this->Box2D->TabStop = false;
 			this->Box2D->MouseDown += gcnew System::Windows::Forms::MouseEventHandler(this, &MyForm::Box2D_MouseDown);
@@ -149,11 +152,21 @@ namespace My3DLab3 {
 			this->Make3DBtn->UseVisualStyleBackColor = true;
 			this->Make3DBtn->Click += gcnew System::EventHandler(this, &MyForm::Make3DBtn_Click);
 			// 
+			// button1
+			// 
+			this->button1->Location = System::Drawing::Point(868, 204);
+			this->button1->Name = L"button1";
+			this->button1->Size = System::Drawing::Size(75, 23);
+			this->button1->TabIndex = 8;
+			this->button1->Text = L"button1";
+			this->button1->UseVisualStyleBackColor = true;
+			// 
 			// MyForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(1109, 546);
+			this->Controls->Add(this->button1);
 			this->Controls->Add(this->Make3DBtn);
 			this->Controls->Add(this->ColorPickBtn);
 			this->Controls->Add(this->Deg3D);
@@ -176,29 +189,31 @@ namespace My3DLab3 {
 		Graphics^ Draw3D;
 		Pen^ Pen2D;
 
-		Void Draw2DFunc(std::vector<Dot2D> Dots) {
-			// Рисование точки нажатия
-			this->Draw2D->DrawEllipse(this->Pen2D, Dots[Dots.size() - 1].x - 3, Dots[Dots.size() - 1].y - 3, 6, 6);
-			// Соединение точек
-			if (Dots.size() > 1) {
-				this->Draw2D->DrawLine(Pen2D, Dots[Dots.size() - 2].x, Dots[Dots.size() - 2].y,
-					Dots[Dots.size() - 1].x, Dots[Dots.size() - 1].y);
-			}
-		};
-		Void Draw2DFunc(int x1, int y1, int x2, int y2) {
-			// Соединение точек
-			if (Dots2D.size() > 1) {
-				this->Draw2D->DrawLine(Pen2D, x1, y1, x2, y2);
-			}
-		};
-
 		//Void Draw3DFunc();
 
-		std::vector<Dot3D> Create3D(std::vector<Dot2D> Dots, int steps) {
+		std::vector<std::vector<Dot3D>> Create3D(std::vector<Dot2D> Dots, int steps) {
+			Dot3D vec{};
+			vec.x = Dots[Dots.size() - 1].x;
+			vec.y = Dots[Dots.size() - 1].y;
+			vec.z = 0;
+
+			std::vector<Dot3D> returned;
+			for (int i = 0; i < Dots.size(); ++i) {
+				Dot3D tim{};
+				tim.x = Dots[i].x;
+				tim.y = Dots[i].y;
+				tim.z = 0;	// Изменить вектор returned Должен возвращаться двумерный массив
+				returned.push_back(tim);						
+			}
+
 			for (int i = 0; i < steps; ++i) {
 				int degree = (360 / steps) * i;
+				double MCos = cos(degree);       // Вроде всё верно
+				double MSin = sin(degree);
 				for (int j = 1; j < Dots.size() - 1; ++j) {
-					// Создание матрицы
+					int x = ((MCos + (1 - MCos) * pow(vec.x, 2)) * returned[j].x) +
+						(((1 - MCos) * vec.x * vec.y - MSin * vec.z) * returned[j].y) +
+						(((1 - MCos) * vec.x * vec.z + MSin * vec.y) * returned[j].z);
 				}
 			}
 		}
@@ -214,13 +229,18 @@ namespace My3DLab3 {
 
 	//Действие нажатия мыши
 	private: System::Void Box2D_MouseDown(System::Object^ sender, System::Windows::Forms::MouseEventArgs^ e) {
+		// Рисование точки нажатия
+		this->Draw2D->DrawEllipse(this->Pen2D, e->X - 3, e->Y - 3, 6, 6);
 		// Добавление точки в вектор
 		Dot2D temporary_dot{};
 		temporary_dot.x = e->X;
 		temporary_dot.y = e->Y;
 		Dots2D.push_back(temporary_dot);
-		// Рисование на 2D форме
-		Draw2DFunc(Dots2D);
+		// Соединение точек
+		if (Dots2D.size() > 1) {
+			this->Draw2D->DrawLine(Pen2D, Dots2D[Dots2D.size() - 2].x, Dots2D[Dots2D.size() - 2].y,
+				Dots2D[Dots2D.size() - 1].x, Dots2D[Dots2D.size() - 1].y);
+		}
 	}
 	// Выбор цвета
 	private: System::Void ColorPickBtn_Click(System::Object^ sender, System::EventArgs^ e) {
@@ -230,12 +250,27 @@ namespace My3DLab3 {
 	}
 	// Основная функция рисования 3D объекта
 	private: System::Void Make3DBtn_Click(System::Object^ sender, System::EventArgs^ e) {
-		Pen2D->Width = 2;
-		Draw2DFunc(Dots2D[0].x, Dots2D[0].y,Dots2D[Dots2D.size() - 1].x, Dots2D[Dots2D.size() - 1].y);
+		Pen2D->Width = 3;
+		Draw2D->DrawLine(Pen2D, Dots2D[0].x, Dots2D[0].y,Dots2D[Dots2D.size() - 1].x, Dots2D[Dots2D.size() - 1].y);
 
 		int steps = 360. / System::Convert::ToInt32(this->Deg3D->Value) + 0.5;
 		//int degree = 360 / steps;
 		
+		// Перемешение 2D фигуры в начало координат
+		for (int i = 1; i < Dots2D.size(); ++i) {
+			Dots2D[i].x -= Dots2D[0].x;
+			Dots2D[i].y -= Dots2D[0].y;
+		}
+		Dots2D[0].x = 0;
+		Dots2D[0].y = 0;
+		// Создание 3D Объекта
+
+		//Перенос 3D объекта в центр формы
+		for (int i = 0; i < Dots2D.size(); ++i) {
+			Dots2D[i].x += this->Box3D->Width/2;
+			Dots2D[i].y += this->Box3D->Height/2;
+			this->Draw3D->DrawEllipse(this->Pen2D, Dots2D[i].x - 3, Dots2D[i].y - 3, 6, 6);
+		}
 	}
 };
 }
