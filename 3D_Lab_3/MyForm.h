@@ -198,7 +198,7 @@ namespace My3DLab3 {
 			for (int i = 0; i < steps; ++i) {
 				int degree = (360 / steps) * i;
 				for (int j = 1; j < Dots.size() - 1; ++j) {
-					// Остановился на создании матрицы 
+					// Остановился на создании матрицы
 				}
 			}
 		}
