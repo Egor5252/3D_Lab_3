@@ -11,7 +11,7 @@ struct Dot3D {
 };
 
 std::vector<Dot2D> Dots2D;
-std::vector<Dot3D> Dots3D;
+std::vector<std::vector<Dot3D>> Dots3D;
 
 namespace My3DLab3 {
 
@@ -61,6 +61,7 @@ namespace My3DLab3 {
 	private: System::Windows::Forms::Button^ Make3DBtn;
 	private: System::Windows::Forms::ColorDialog^ Color2D;
 	private: System::Windows::Forms::Button^ button1;
+	private: System::Windows::Forms::RichTextBox^ richTextBox1;
 
 
 
@@ -89,6 +90,7 @@ namespace My3DLab3 {
 			this->ColorPickBtn = (gcnew System::Windows::Forms::Button());
 			this->Make3DBtn = (gcnew System::Windows::Forms::Button());
 			this->button1 = (gcnew System::Windows::Forms::Button());
+			this->richTextBox1 = (gcnew System::Windows::Forms::RichTextBox());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->Box3D))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->Box2D))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->pictureBox1))->BeginInit();
@@ -154,18 +156,28 @@ namespace My3DLab3 {
 			// 
 			// button1
 			// 
-			this->button1->Location = System::Drawing::Point(868, 204);
+			this->button1->Location = System::Drawing::Point(795, 143);
 			this->button1->Name = L"button1";
 			this->button1->Size = System::Drawing::Size(75, 23);
 			this->button1->TabIndex = 8;
 			this->button1->Text = L"button1";
 			this->button1->UseVisualStyleBackColor = true;
+			this->button1->Click += gcnew System::EventHandler(this, &MyForm::button1_Click);
+			// 
+			// richTextBox1
+			// 
+			this->richTextBox1->Location = System::Drawing::Point(816, 183);
+			this->richTextBox1->Name = L"richTextBox1";
+			this->richTextBox1->Size = System::Drawing::Size(264, 308);
+			this->richTextBox1->TabIndex = 9;
+			this->richTextBox1->Text = L"";
 			// 
 			// MyForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(1109, 546);
+			this->Controls->Add(this->richTextBox1);
 			this->Controls->Add(this->button1);
 			this->Controls->Add(this->Make3DBtn);
 			this->Controls->Add(this->ColorPickBtn);
@@ -197,25 +209,45 @@ namespace My3DLab3 {
 			vec.y = Dots[Dots.size() - 1].y;
 			vec.z = 0;
 
-			std::vector<Dot3D> returned;
+			std::vector<std::vector<Dot3D>> returned;
+			std::vector<Dot3D> temporary;
+			std::vector<Dot3D> temporary1;
+
 			for (int i = 0; i < Dots.size(); ++i) {
 				Dot3D tim{};
 				tim.x = Dots[i].x;
 				tim.y = Dots[i].y;
-				tim.z = 0;	// Изменить вектор returned Должен возвращаться двумерный массив
-				returned.push_back(tim);						
+				tim.z = 0;
+				temporary.push_back(tim);
 			}
+			returned.push_back(temporary);
 
-			for (int i = 0; i < steps; ++i) {
-				int degree = (360 / steps) * i;
-				double MCos = cos(degree);       // Вроде всё верно
+			for (int i = 1; i < steps; ++i) {
+				double degree = ((360. / steps) * i) * 3.1415926535 / 180;
+				double MCos = cos(degree);
 				double MSin = sin(degree);
-				for (int j = 1; j < Dots.size() - 1; ++j) {
-					int x = ((MCos + (1 - MCos) * pow(vec.x, 2)) * returned[j].x) +
-						(((1 - MCos) * vec.x * vec.y - MSin * vec.z) * returned[j].y) +
-						(((1 - MCos) * vec.x * vec.z + MSin * vec.y) * returned[j].z);
+				for (int j = 1; j < temporary.size() - 1; ++j) {
+
+					double x = ((MCos + (1 - MCos) * pow(vec.x, 2)) * temporary[j].x) +
+						(((1 - MCos) * vec.x * vec.y - MSin * vec.z) * temporary[j].y) +
+						(((1 - MCos) * vec.x * vec.z + MSin * vec.y) * temporary[j].z);
+
+					double y = (((1 - MCos) * vec.y * vec.x + MSin * vec.z) * temporary[j].x) +
+						((MCos + (1 - MCos) * pow(vec.y, 2)) * temporary[j].y) +
+						((1 - MCos) * vec.y * vec.z - MSin * vec.x) * temporary[j].z;
+
+					double z = (((1 - MCos) * vec.z * vec.x - MSin * vec.y) * temporary[j].x) +
+						(((1 - MCos) * vec.z * vec.y + MSin * vec.x) * temporary[j].y) +
+						((MCos + (1 - MCos) * pow(vec.z, 2)) * temporary[j].z);
+
+					Dot3D G{};
+					G.x = x; G.y = y; G.z = z;
+					temporary1.push_back(G);
 				}
+				returned.push_back(temporary1);
+				temporary1.resize(0);
 			}
+			return returned;
 		}
 
 #pragma endregion
@@ -253,9 +285,7 @@ namespace My3DLab3 {
 		Pen2D->Width = 3;
 		Draw2D->DrawLine(Pen2D, Dots2D[0].x, Dots2D[0].y,Dots2D[Dots2D.size() - 1].x, Dots2D[Dots2D.size() - 1].y);
 
-		int steps = 360. / System::Convert::ToInt32(this->Deg3D->Value) + 0.5;
-		//int degree = 360 / steps;
-		
+		int steps = 360. / System::Convert::ToInt32(this->Deg3D->Value) + 0.5;		
 		// Перемешение 2D фигуры в начало координат
 		for (int i = 1; i < Dots2D.size(); ++i) {
 			Dots2D[i].x -= Dots2D[0].x;
@@ -263,13 +293,20 @@ namespace My3DLab3 {
 		}
 		Dots2D[0].x = 0;
 		Dots2D[0].y = 0;
+		// Поворот 2D фигуры
 		// Создание 3D Объекта
-
+		Dots3D = Create3D(Dots2D, steps);
+		Pen2D->Width = 1;
 		//Перенос 3D объекта в центр формы
 		for (int i = 0; i < Dots2D.size(); ++i) {
 			Dots2D[i].x += this->Box3D->Width/2;
 			Dots2D[i].y += this->Box3D->Height/2;
 			this->Draw3D->DrawEllipse(this->Pen2D, Dots2D[i].x - 3, Dots2D[i].y - 3, 6, 6);
+		}
+	}
+	private: System::Void button1_Click(System::Object^ sender, System::EventArgs^ e) {
+		for (int i = 0; i < Dots3D.size(); ++i) {
+			this->richTextBox1->Text += System::Convert::ToString(Dots3D[i][1].x) + " ";
 		}
 	}
 };
