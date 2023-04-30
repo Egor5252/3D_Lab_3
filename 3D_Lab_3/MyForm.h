@@ -3,11 +3,11 @@
 #include <cmath>
 
 struct Dot2D {
-	int x, y;
+	double x, y;
 };
 
 struct Dot3D {
-	int x, y, z;
+	double x, y, z;
 };
 
 std::vector<Dot2D> Dots2D;
@@ -60,8 +60,8 @@ namespace My3DLab3 {
 	private: System::Windows::Forms::Button^ ColorPickBtn;
 	private: System::Windows::Forms::Button^ Make3DBtn;
 	private: System::Windows::Forms::ColorDialog^ Color2D;
-	private: System::Windows::Forms::Button^ button1;
-	private: System::Windows::Forms::RichTextBox^ richTextBox1;
+
+
 
 
 
@@ -89,8 +89,6 @@ namespace My3DLab3 {
 			this->Deg3D = (gcnew System::Windows::Forms::NumericUpDown());
 			this->ColorPickBtn = (gcnew System::Windows::Forms::Button());
 			this->Make3DBtn = (gcnew System::Windows::Forms::Button());
-			this->button1 = (gcnew System::Windows::Forms::Button());
-			this->richTextBox1 = (gcnew System::Windows::Forms::RichTextBox());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->Box3D))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->Box2D))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->pictureBox1))->BeginInit();
@@ -154,31 +152,11 @@ namespace My3DLab3 {
 			this->Make3DBtn->UseVisualStyleBackColor = true;
 			this->Make3DBtn->Click += gcnew System::EventHandler(this, &MyForm::Make3DBtn_Click);
 			// 
-			// button1
-			// 
-			this->button1->Location = System::Drawing::Point(795, 143);
-			this->button1->Name = L"button1";
-			this->button1->Size = System::Drawing::Size(75, 23);
-			this->button1->TabIndex = 8;
-			this->button1->Text = L"button1";
-			this->button1->UseVisualStyleBackColor = true;
-			this->button1->Click += gcnew System::EventHandler(this, &MyForm::button1_Click);
-			// 
-			// richTextBox1
-			// 
-			this->richTextBox1->Location = System::Drawing::Point(816, 183);
-			this->richTextBox1->Name = L"richTextBox1";
-			this->richTextBox1->Size = System::Drawing::Size(264, 308);
-			this->richTextBox1->TabIndex = 9;
-			this->richTextBox1->Text = L"";
-			// 
 			// MyForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(1109, 546);
-			this->Controls->Add(this->richTextBox1);
-			this->Controls->Add(this->button1);
+			this->ClientSize = System::Drawing::Size(828, 546);
 			this->Controls->Add(this->Make3DBtn);
 			this->Controls->Add(this->ColorPickBtn);
 			this->Controls->Add(this->Deg3D);
@@ -207,6 +185,9 @@ namespace My3DLab3 {
 			Dot3D vec{};
 			vec.x = Dots[Dots.size() - 1].x;
 			vec.y = Dots[Dots.size() - 1].y;
+			double dlina = sqrt(pow(vec.x, 2) + pow(vec.y, 2));
+			vec.x /= dlina;
+			vec.y /= dlina;
 			vec.z = 0;
 
 			std::vector<std::vector<Dot3D>> returned;
@@ -226,7 +207,7 @@ namespace My3DLab3 {
 				double degree = ((360. / steps) * i) * 3.1415926535 / 180;
 				double MCos = cos(degree);
 				double MSin = sin(degree);
-				for (int j = 1; j < temporary.size() - 1; ++j) {
+				for (int j = 0; j < temporary.size(); ++j) {
 
 					double x = ((MCos + (1 - MCos) * pow(vec.x, 2)) * temporary[j].x) +
 						(((1 - MCos) * vec.x * vec.y - MSin * vec.z) * temporary[j].y) +
@@ -270,7 +251,7 @@ namespace My3DLab3 {
 		Dots2D.push_back(temporary_dot);
 		// Соединение точек
 		if (Dots2D.size() > 1) {
-			this->Draw2D->DrawLine(Pen2D, Dots2D[Dots2D.size() - 2].x, Dots2D[Dots2D.size() - 2].y,
+			this->Draw2D->DrawLine(Pen2D, int(Dots2D[Dots2D.size() - 2].x), Dots2D[Dots2D.size() - 2].y,
 				Dots2D[Dots2D.size() - 1].x, Dots2D[Dots2D.size() - 1].y);
 		}
 	}
@@ -283,7 +264,7 @@ namespace My3DLab3 {
 	// Основная функция рисования 3D объекта
 	private: System::Void Make3DBtn_Click(System::Object^ sender, System::EventArgs^ e) {
 		Pen2D->Width = 3;
-		Draw2D->DrawLine(Pen2D, Dots2D[0].x, Dots2D[0].y,Dots2D[Dots2D.size() - 1].x, Dots2D[Dots2D.size() - 1].y);
+		Draw2D->DrawLine(Pen2D, int(Dots2D[0].x), Dots2D[0].y,Dots2D[Dots2D.size() - 1].x, Dots2D[Dots2D.size() - 1].y);
 
 		int steps = 360. / System::Convert::ToInt32(this->Deg3D->Value) + 0.5;		
 		// Перемешение 2D фигуры в начало координат
@@ -293,21 +274,25 @@ namespace My3DLab3 {
 		}
 		Dots2D[0].x = 0;
 		Dots2D[0].y = 0;
-		// Поворот 2D фигуры
 		// Создание 3D Объекта
 		Dots3D = Create3D(Dots2D, steps);
 		Pen2D->Width = 1;
 		//Перенос 3D объекта в центр формы
-		for (int i = 0; i < Dots2D.size(); ++i) {
-			Dots2D[i].x += this->Box3D->Width/2;
-			Dots2D[i].y += this->Box3D->Height/2;
-			this->Draw3D->DrawEllipse(this->Pen2D, Dots2D[i].x - 3, Dots2D[i].y - 3, 6, 6);
-		}
-	}
-	private: System::Void button1_Click(System::Object^ sender, System::EventArgs^ e) {
 		for (int i = 0; i < Dots3D.size(); ++i) {
-			this->richTextBox1->Text += System::Convert::ToString(Dots3D[i][1].x) + " ";
+			for (int j = 0; j < Dots3D[i].size(); ++j) {
+				Dots3D[i][j].x += this->Box3D->Width / 2;
+				Dots3D[i][j].y += this->Box3D->Height / 2;
+				//this->Draw3D->DrawEllipse(this->Pen2D, Dots3D[i][j].x - 3, Dots3D[i][j].y - 3, 6, 6);
+			}
 		}
+		Pen2D->Width = 1;
+		for (int i = 0; i < Dots3D.size()-1; ++i) {
+			for (int j = 0; j < Dots3D[i].size()-1; ++j) {
+				this->Draw3D->DrawLine(Pen2D, int(Dots3D[i][j].x), Dots3D[i][j].y, Dots3D[i][j + 1].x, Dots3D[i][j + 1].y);
+				this->Draw3D->DrawLine(Pen2D, int(Dots3D[i][j].x), Dots3D[i][j].y, Dots3D[i+1][j].x, Dots3D[i+1][j].y);
+			}
+		}
+
 	}
 };
 }
