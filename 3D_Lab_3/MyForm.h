@@ -62,6 +62,9 @@ namespace My3DLab3 {
 	private: System::Windows::Forms::ColorDialog^ Color2D;
 	private: System::Windows::Forms::Button^ button1;
 	private: System::Windows::Forms::Button^ button2;
+	private: System::Windows::Forms::Button^ button3;
+	private: System::Windows::Forms::Button^ button4;
+
 
 
 
@@ -77,7 +80,7 @@ namespace My3DLab3 {
 		/// <summary>
 		/// Обязательная переменная конструктора.
 		/// </summary>
-		System::ComponentModel::Container ^components;
+		System::ComponentModel::Container^ components;
 
 #pragma region Windows Form Designer generated code
 		/// <summary>
@@ -95,6 +98,8 @@ namespace My3DLab3 {
 			this->Make3DBtn = (gcnew System::Windows::Forms::Button());
 			this->button1 = (gcnew System::Windows::Forms::Button());
 			this->button2 = (gcnew System::Windows::Forms::Button());
+			this->button3 = (gcnew System::Windows::Forms::Button());
+			this->button4 = (gcnew System::Windows::Forms::Button());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->Box3D))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->Box2D))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->pictureBox1))->BeginInit();
@@ -131,7 +136,7 @@ namespace My3DLab3 {
 			// Deg3D
 			// 
 			this->Deg3D->Location = System::Drawing::Point(731, 41);
-			this->Deg3D->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 90, 0, 0, 0 });
+			this->Deg3D->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 360, 0, 0, 0 });
 			this->Deg3D->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 1, 0, 0, 0 });
 			this->Deg3D->Name = L"Deg3D";
 			this->Deg3D->Size = System::Drawing::Size(75, 20);
@@ -178,11 +183,33 @@ namespace My3DLab3 {
 			this->button2->UseVisualStyleBackColor = true;
 			this->button2->Click += gcnew System::EventHandler(this, &MyForm::button2_Click);
 			// 
+			// button3
+			// 
+			this->button3->Location = System::Drawing::Point(731, 155);
+			this->button3->Name = L"button3";
+			this->button3->Size = System::Drawing::Size(75, 38);
+			this->button3->TabIndex = 10;
+			this->button3->Text = L"Увеличить";
+			this->button3->UseVisualStyleBackColor = true;
+			this->button3->Click += gcnew System::EventHandler(this, &MyForm::button3_Click);
+			// 
+			// button4
+			// 
+			this->button4->Location = System::Drawing::Point(730, 199);
+			this->button4->Name = L"button4";
+			this->button4->Size = System::Drawing::Size(75, 38);
+			this->button4->TabIndex = 11;
+			this->button4->Text = L"Уменьшить";
+			this->button4->UseVisualStyleBackColor = true;
+			this->button4->Click += gcnew System::EventHandler(this, &MyForm::button4_Click);
+			// 
 			// MyForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(817, 546);
+			this->Controls->Add(this->button4);
+			this->Controls->Add(this->button3);
 			this->Controls->Add(this->button2);
 			this->Controls->Add(this->button1);
 			this->Controls->Add(this->Make3DBtn);
@@ -207,7 +234,20 @@ namespace My3DLab3 {
 		Graphics^ Draw3D;
 		Pen^ Pen2D;
 
-		//Void Draw3DFunc();
+		Void Draw3DFunc(std::vector<std::vector<Dot3D>> Dots3D) {
+			for (int i = 0; i < Dots3D.size() - 1; ++i) {
+				for (int j = 0; j < Dots3D[i].size() - 1; ++j) {
+					this->Draw3D->DrawLine(Pen2D, int(Dots3D[i][j].x), Dots3D[i][j].y, Dots3D[i][j + 1].x, Dots3D[i][j + 1].y);
+					this->Draw3D->DrawLine(Pen2D, int(Dots3D[i][j].x), Dots3D[i][j].y, Dots3D[i + 1][j].x, Dots3D[i + 1][j].y);
+				}
+			}
+			for (int j = 0; j < Dots3D[0].size() - 1; ++j) {
+				this->Draw3D->DrawLine(Pen2D, int(Dots3D[Dots3D.size() - 1][j].x), Dots3D[Dots3D.size() - 1][j].y,
+					Dots3D[Dots3D.size() - 1][j + 1].x, Dots3D[Dots3D.size() - 1][j + 1].y);
+				this->Draw3D->DrawLine(Pen2D, int(Dots3D[0][j].x), Dots3D[0][j].y, Dots3D[Dots3D.size() - 1][j].x,
+					Dots3D[Dots3D.size() - 1][j].y);
+			}
+		};
 
 		std::vector<std::vector<Dot3D>> Create3D(std::vector<Dot2D> Dots, int steps) {
 			Dot3D vec{};
@@ -232,7 +272,7 @@ namespace My3DLab3 {
 			returned.push_back(temporary);
 
 			for (int i = 1; i < steps; ++i) {
-				double degree = ((360. / steps) * i) * 3.1415926535 / 180;
+				double degree = ((360. / steps) * i) * 3.1415926535 / 180.;
 				double MCos = cos(degree);
 				double MSin = sin(degree);
 				for (int j = 0; j < temporary.size(); ++j) {
@@ -260,7 +300,7 @@ namespace My3DLab3 {
 		}
 
 #pragma endregion
-	// Инициализация переменных
+		// Инициализация переменных
 	private: System::Void MyForm_Load(System::Object^ sender, System::EventArgs^ e) {
 		this->Draw2D = this->Box2D->CreateGraphics();
 		this->Draw3D = this->Box3D->CreateGraphics();
@@ -268,7 +308,7 @@ namespace My3DLab3 {
 		pictureBox1->BackColor = this->Color2D->Color;
 	}
 
-	//Действие нажатия мыши
+		   //Действие нажатия мыши
 	private: System::Void Box2D_MouseDown(System::Object^ sender, System::Windows::Forms::MouseEventArgs^ e) {
 		// Рисование точки нажатия
 		this->Draw2D->DrawEllipse(this->Pen2D, e->X - 3, e->Y - 3, 6, 6);
@@ -283,18 +323,19 @@ namespace My3DLab3 {
 				Dots2D[Dots2D.size() - 1].x, Dots2D[Dots2D.size() - 1].y);
 		}
 	}
-	// Выбор цвета
+		   // Выбор цвета
 	private: System::Void ColorPickBtn_Click(System::Object^ sender, System::EventArgs^ e) {
 		this->Color2D->ShowDialog();
 		this->Pen2D->Color = this->Color2D->Color;
 		pictureBox1->BackColor = this->Color2D->Color;
 	}
-	// Основная функция рисования 3D объекта
+		   // Основная функция рисования 3D объекта
 	private: System::Void Make3DBtn_Click(System::Object^ sender, System::EventArgs^ e) {
+		Draw3D->Clear(Color::WhiteSmoke);
 		Pen2D->Width = 3;
-		Draw2D->DrawLine(Pen2D, int(Dots2D[0].x), Dots2D[0].y,Dots2D[Dots2D.size() - 1].x, Dots2D[Dots2D.size() - 1].y);
+		Draw2D->DrawLine(Pen2D, int(Dots2D[0].x), Dots2D[0].y, Dots2D[Dots2D.size() - 1].x, Dots2D[Dots2D.size() - 1].y);
 
-		int steps = 360. / System::Convert::ToInt32(this->Deg3D->Value) + 0.5;		
+		int steps = 360. / System::Convert::ToInt32(this->Deg3D->Value) + 0.5;
 		// Перемешение 2D фигуры в начало координат
 		double t_x, t_y;
 		t_x = (Dots2D[0].x + Dots2D[Dots2D.size() - 1].x) / 2;
@@ -305,7 +346,6 @@ namespace My3DLab3 {
 		}
 		// Создание 3D Объекта
 		Dots3D = Create3D(Dots2D, steps);
-		Pen2D->Width = 1;
 		//Перенос 3D объекта в центр формы
 		for (int i = 0; i < Dots3D.size(); ++i) {
 			for (int j = 0; j < Dots3D[i].size(); ++j) {
@@ -314,26 +354,15 @@ namespace My3DLab3 {
 				// точки this->Draw3D->DrawEllipse(this->Pen2D, Dots3D[i][j].x - 3, Dots3D[i][j].y - 3, 6, 6);
 			}
 		}
-		Pen2D->Width = 1;
 		/*Отрисовка 3D фигуры*/
-		for (int i = 0; i < Dots3D.size() - 1; ++i) {
-			for (int j = 0; j < Dots3D[i].size() - 1; ++j) {
-				this->Draw3D->DrawLine(Pen2D, int(Dots3D[i][j].x), Dots3D[i][j].y, Dots3D[i][j + 1].x, Dots3D[i][j + 1].y);
-				this->Draw3D->DrawLine(Pen2D, int(Dots3D[i][j].x), Dots3D[i][j].y, Dots3D[i + 1][j].x, Dots3D[i + 1][j].y);
-				this->Draw3D->DrawLine(Pen2D, int(Dots3D[0][j].x), Dots3D[0][j].y, Dots3D[Dots3D.size() - 1][j].x,
-					Dots3D[Dots3D.size() - 1][j].y);
-			}
-		}
-		for (int j = 0; j < Dots3D[0].size() - 1; ++j) {
-			this->Draw3D->DrawLine(Pen2D, int(Dots3D[Dots3D.size() - 1][j].x), Dots3D[Dots3D.size() - 1][j].y,
-				Dots3D[Dots3D.size() - 1][j + 1].x, Dots3D[Dots3D.size() - 1][j + 1].y);
-		}
+		Pen2D->Width = 1;
+		Draw3DFunc(Dots3D);
 
 	}
 	private: System::Void button1_Click(System::Object^ sender, System::EventArgs^ e) {
 		double t_x, t_y;
-		t_x = (Dots3D[0][0].x + Dots3D[0][Dots2D.size() - 1].x) / 2;
-		t_y = (Dots3D[0][0].y + Dots3D[0][Dots2D.size() - 1].y) / 2;
+		t_x = (Dots3D[0][0].x + Dots3D[0][Dots2D.size() - 1.].x) / 2.;
+		t_y = (Dots3D[0][0].y + Dots3D[0][Dots2D.size() - 1.].y) / 2.;
 		for (int i = 0; i < Dots3D.size(); ++i) {
 			for (int j = 0; j < Dots3D[i].size(); ++j) {
 				Dots3D[i][j].x -= t_x;
@@ -341,8 +370,8 @@ namespace My3DLab3 {
 			}
 		}
 
-		double MCos = cos(3.1415926535 / 48);
-		double MSin = sin(3.1415926535 / 48);
+		double MCos = cos(3.1415926535 / 48.);
+		double MSin = sin(3.1415926535 / 48.);
 		for (int i = 0; i < Dots3D.size(); ++i) {
 			for (int j = 0; j < Dots3D[i].size(); ++j) {
 				Dots3D[i][j].y = MCos * Dots3D[i][j].y - MSin * Dots3D[i][j].z;
@@ -359,23 +388,13 @@ namespace My3DLab3 {
 			}
 		}
 
-		for (int i = 0; i < Dots3D.size() - 1; ++i) {
-			for (int j = 0; j < Dots3D[i].size() - 1; ++j) {
-				this->Draw3D->DrawLine(Pen2D, int(Dots3D[i][j].x), Dots3D[i][j].y, Dots3D[i][j + 1].x, Dots3D[i][j + 1].y);
-				this->Draw3D->DrawLine(Pen2D, int(Dots3D[i][j].x), Dots3D[i][j].y, Dots3D[i + 1][j].x, Dots3D[i + 1][j].y);
-				this->Draw3D->DrawLine(Pen2D, int(Dots3D[0][j].x), Dots3D[0][j].y, Dots3D[Dots3D.size() - 1][j].x,
-					Dots3D[Dots3D.size() - 1][j].y);
-			}
-		}
-		for (int j = 0; j < Dots3D[0].size() - 1; ++j) {
-			this->Draw3D->DrawLine(Pen2D, int(Dots3D[Dots3D.size() - 1][j].x), Dots3D[Dots3D.size() - 1][j].y,
-				Dots3D[Dots3D.size() - 1][j + 1].x, Dots3D[Dots3D.size() - 1][j + 1].y);
-		}
+		Draw3DFunc(Dots3D);
 	}
 	private: System::Void button2_Click(System::Object^ sender, System::EventArgs^ e) {
 		double t_x, t_y;
-		t_x = (Dots3D[0][0].x + Dots3D[0][Dots2D.size() - 1].x) / 2;
-		t_y = (Dots3D[0][0].y + Dots3D[0][Dots2D.size() - 1].y) / 2;
+		t_x = (Dots3D[0][0].x + Dots3D[0][Dots2D.size() - 1.].x) / 2.;
+		t_y = (Dots3D[0][0].y + Dots3D[0][Dots2D.size() - 1.].y) / 2.;
+
 		for (int i = 0; i < Dots3D.size(); ++i) {
 			for (int j = 0; j < Dots3D[i].size(); ++j) {
 				Dots3D[i][j].x -= t_x;
@@ -383,8 +402,9 @@ namespace My3DLab3 {
 			}
 		}
 
-		double MCos = cos(3.1415926535 / 48);
-		double MSin = sin(3.1415926535 / 48);
+		double MCos = cos(3.1415926535 / 48.);
+		double MSin = sin(3.1415926535 / 48.);
+
 		for (int i = 0; i < Dots3D.size(); ++i) {
 			for (int j = 0; j < Dots3D[i].size(); ++j) {
 				Dots3D[i][j].x = MCos * Dots3D[i][j].x + MSin * Dots3D[i][j].z;
@@ -401,18 +421,69 @@ namespace My3DLab3 {
 			}
 		}
 
-		for (int i = 0; i < Dots3D.size() - 1; ++i) {
-			for (int j = 0; j < Dots3D[i].size() - 1; ++j) {
-				this->Draw3D->DrawLine(Pen2D, int(Dots3D[i][j].x), Dots3D[i][j].y, Dots3D[i][j + 1].x, Dots3D[i][j + 1].y);
-				this->Draw3D->DrawLine(Pen2D, int(Dots3D[i][j].x), Dots3D[i][j].y, Dots3D[i + 1][j].x, Dots3D[i + 1][j].y);
-				this->Draw3D->DrawLine(Pen2D, int(Dots3D[0][j].x), Dots3D[0][j].y, Dots3D[Dots3D.size() - 1][j].x,
-					Dots3D[Dots3D.size() - 1][j].y);
+		Draw3DFunc(Dots3D);
+	}
+	private: System::Void button3_Click(System::Object^ sender, System::EventArgs^ e) {
+		double t_x, t_y;
+		t_x = (Dots3D[0][0].x + Dots3D[0][Dots2D.size() - 1.].x) / 2.;
+		t_y = (Dots3D[0][0].y + Dots3D[0][Dots2D.size() - 1.].y) / 2.;
+
+		for (int i = 0; i < Dots3D.size(); ++i) {
+			for (int j = 0; j < Dots3D[i].size(); ++j) {
+				Dots3D[i][j].x -= t_x;
+				Dots3D[i][j].y -= t_y;
 			}
 		}
-		for (int j = 0; j < Dots3D[0].size() - 1; ++j) {
-			this->Draw3D->DrawLine(Pen2D, int(Dots3D[Dots3D.size() - 1][j].x), Dots3D[Dots3D.size() - 1][j].y,
-				Dots3D[Dots3D.size() - 1][j + 1].x, Dots3D[Dots3D.size() - 1][j + 1].y);
+
+		for (int i = 0; i < Dots3D.size(); ++i) {
+			for (int j = 0; j < Dots3D[i].size(); ++j) {
+				Dots3D[i][j].x *= 1.05;
+				Dots3D[i][j].y *= 1.05;
+				Dots3D[i][j].z *= 1.05;
+			}
 		}
+
+		Draw3D->Clear(Color::WhiteSmoke);
+
+		for (int i = 0; i < Dots3D.size(); ++i) {
+			for (int j = 0; j < Dots3D[i].size(); ++j) {
+				Dots3D[i][j].x += t_x;
+				Dots3D[i][j].y += t_y;
+			}
+		}
+
+		Draw3DFunc(Dots3D);
 	}
-};
+	private: System::Void button4_Click(System::Object^ sender, System::EventArgs^ e) {
+		double t_x, t_y;
+		t_x = (Dots3D[0][0].x + Dots3D[0][Dots2D.size() - 1.].x) / 2.;
+		t_y = (Dots3D[0][0].y + Dots3D[0][Dots2D.size() - 1.].y) / 2.;
+
+		for (int i = 0; i < Dots3D.size(); ++i) {
+			for (int j = 0; j < Dots3D[i].size(); ++j) {
+				Dots3D[i][j].x -= t_x;
+				Dots3D[i][j].y -= t_y;
+			}
+		}
+
+		for (int i = 0; i < Dots3D.size(); ++i) {
+			for (int j = 0; j < Dots3D[i].size(); ++j) {
+				Dots3D[i][j].x /= 1.05;
+				Dots3D[i][j].y /= 1.05;
+				Dots3D[i][j].z /= 1.05;
+			}
+		}
+
+		Draw3D->Clear(Color::WhiteSmoke);
+
+		for (int i = 0; i < Dots3D.size(); ++i) {
+			for (int j = 0; j < Dots3D[i].size(); ++j) {
+				Dots3D[i][j].x += t_x;
+				Dots3D[i][j].y += t_y;
+			}
+		}
+
+		Draw3DFunc(Dots3D);
+	}
+	};
 }
