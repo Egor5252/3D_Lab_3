@@ -234,22 +234,14 @@ namespace My3DLab3 {
 		Graphics^ Draw3D;
 		Pen^ Pen2D;
 
-		Void Draw3DFunc(std::vector<std::vector<Dot3D>> Dots3D) {
-			for (int i = 0; i < Dots3D.size() - 1; ++i) {
-				for (int j = 0; j < Dots3D[i].size() - 1; ++j) {
-					//if (Dots3D[i][j].z >= -2) {
-						this->Draw3D->DrawLine(Pen2D, int(Dots3D[i][j].x), Dots3D[i][j].y, Dots3D[i][j + 1].x, Dots3D[i][j + 1].y);
-						this->Draw3D->DrawLine(Pen2D, int(Dots3D[i][j].x), Dots3D[i][j].y, Dots3D[i + 1][j].x, Dots3D[i + 1][j].y);
-					//}
+		Void Draw3DFunc(std::vector<std::vector<Dot3D>> Dots) {
+			std::vector<std::vector<Dot3D>> temp = Dots;
+			temp.push_back(Dots[0]);
+			for (int i = 0; i < Dots.size(); ++i) {
+				for (int j = 0; j < Dots[i].size() - 1; ++j) {
+						this->Draw3D->DrawLine(Pen2D, int(temp[i][j].x), temp[i][j].y, temp[i][j + 1].x, temp[i][j + 1].y);
+						this->Draw3D->DrawLine(Pen2D, int(temp[i][j].x), temp[i][j].y, temp[i + 1][j].x, temp[i + 1][j].y);
 				}
-			}
-			for (int j = 0; j < Dots3D[0].size() - 1; ++j) {
-				//if (Dots3D[0][j].z >= -2) {
-					this->Draw3D->DrawLine(Pen2D, int(Dots3D[Dots3D.size() - 1][j].x), Dots3D[Dots3D.size() - 1][j].y,
-						Dots3D[Dots3D.size() - 1][j + 1].x, Dots3D[Dots3D.size() - 1][j + 1].y);
-					this->Draw3D->DrawLine(Pen2D, int(Dots3D[0][j].x), Dots3D[0][j].y, Dots3D[Dots3D.size() - 1][j].x,
-						Dots3D[Dots3D.size() - 1][j].y);
-				//}
 			}
 		};
 
