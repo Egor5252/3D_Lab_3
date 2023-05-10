@@ -1,17 +1,7 @@
 #pragma once
 #include <vector>
 #include <cmath>
-
-struct Dot2D {
-	double x, y;
-};
-
-struct Dot3D {
-	double x, y, z;
-};
-
-std::vector<Dot2D> Dots2D;
-std::vector<std::vector<Dot3D>> Dots3D;
+#include "Header.h"
 
 namespace My3DLab3 {
 
@@ -21,6 +11,7 @@ namespace My3DLab3 {
 	using namespace System::Windows::Forms;
 	using namespace System::Data;
 	using namespace System::Drawing;
+	
 
 	/// <summary>
 	/// Сводка для MyForm
@@ -51,10 +42,7 @@ namespace My3DLab3 {
 	protected:
 	private: System::Windows::Forms::PictureBox^ Box2D;
 
-
-
 	private: System::Windows::Forms::PictureBox^ pictureBox1;
-
 
 	private: System::Windows::Forms::NumericUpDown^ Deg3D;
 	private: System::Windows::Forms::Button^ ColorPickBtn;
@@ -64,23 +52,15 @@ namespace My3DLab3 {
 	private: System::Windows::Forms::Button^ button2;
 	private: System::Windows::Forms::Button^ button3;
 	private: System::Windows::Forms::Button^ button4;
-
-
-
-
-
-
-
-
-
-
-
+	private: System::Windows::Forms::Timer^ timer1;
+	private: System::Windows::Forms::Button^ button5;
+	private: System::ComponentModel::IContainer^ components;
 
 	private:
 		/// <summary>
 		/// Обязательная переменная конструктора.
 		/// </summary>
-		System::ComponentModel::Container^ components;
+
 
 #pragma region Windows Form Designer generated code
 		/// <summary>
@@ -89,6 +69,7 @@ namespace My3DLab3 {
 		/// </summary>
 		void InitializeComponent(void)
 		{
+			this->components = (gcnew System::ComponentModel::Container());
 			this->Box3D = (gcnew System::Windows::Forms::PictureBox());
 			this->Box2D = (gcnew System::Windows::Forms::PictureBox());
 			this->Color2D = (gcnew System::Windows::Forms::ColorDialog());
@@ -100,6 +81,8 @@ namespace My3DLab3 {
 			this->button2 = (gcnew System::Windows::Forms::Button());
 			this->button3 = (gcnew System::Windows::Forms::Button());
 			this->button4 = (gcnew System::Windows::Forms::Button());
+			this->timer1 = (gcnew System::Windows::Forms::Timer(this->components));
+			this->button5 = (gcnew System::Windows::Forms::Button());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->Box3D))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->Box2D))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->pictureBox1))->BeginInit();
@@ -203,11 +186,27 @@ namespace My3DLab3 {
 			this->button4->UseVisualStyleBackColor = true;
 			this->button4->Click += gcnew System::EventHandler(this, &MyForm::button4_Click);
 			// 
+			// timer1
+			// 
+			this->timer1->Interval = 32;
+			this->timer1->Tick += gcnew System::EventHandler(this, &MyForm::timer1_Tick);
+			// 
+			// button5
+			// 
+			this->button5->Location = System::Drawing::Point(731, 243);
+			this->button5->Name = L"button5";
+			this->button5->Size = System::Drawing::Size(75, 38);
+			this->button5->TabIndex = 12;
+			this->button5->Text = L"Автовращение";
+			this->button5->UseVisualStyleBackColor = true;
+			this->button5->Click += gcnew System::EventHandler(this, &MyForm::button5_Click);
+			// 
 			// MyForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(817, 546);
+			this->Controls->Add(this->button5);
 			this->Controls->Add(this->button4);
 			this->Controls->Add(this->button3);
 			this->Controls->Add(this->button2);
@@ -239,63 +238,16 @@ namespace My3DLab3 {
 			temp.push_back(Dots[0]);
 			for (int i = 0; i < Dots.size(); ++i) {
 				for (int j = 0; j < Dots[i].size() - 1; ++j) {
+					//if (temp[i][j].z >= -5 && temp[i][j+1].z >= -5) {
 						this->Draw3D->DrawLine(Pen2D, int(temp[i][j].x), temp[i][j].y, temp[i][j + 1].x, temp[i][j + 1].y);
 						this->Draw3D->DrawLine(Pen2D, int(temp[i][j].x), temp[i][j].y, temp[i + 1][j].x, temp[i + 1][j].y);
+					//}
 				}
 			}
 		};
 
-		std::vector<std::vector<Dot3D>> Create3D(std::vector<Dot2D> Dots, int steps) {
-			Dot3D vec{};
-			vec.x = Dots[Dots.size() - 1].x;
-			vec.y = Dots[Dots.size() - 1].y;
-			double dlina = sqrt(pow(vec.x, 2) + pow(vec.y, 2));
-			vec.x /= dlina;
-			vec.y /= dlina;
-			vec.z = 0;
-
-			std::vector<std::vector<Dot3D>> returned;
-			std::vector<Dot3D> temporary;
-			std::vector<Dot3D> temporary1;
-
-			for (int i = 0; i < Dots.size(); ++i) {
-				Dot3D tim{};
-				tim.x = Dots[i].x;
-				tim.y = Dots[i].y;
-				tim.z = 0;
-				temporary.push_back(tim);
-			}
-			returned.push_back(temporary);
-
-			for (int i = 1; i < steps; ++i) {
-				double degree = ((360. / steps) * i) * 3.1415926535 / 180.;
-				double MCos = cos(degree);
-				double MSin = sin(degree);
-				for (int j = 0; j < temporary.size(); ++j) {
-
-					double x = ((MCos + (1 - MCos) * pow(vec.x, 2)) * temporary[j].x) +
-						(((1 - MCos) * vec.x * vec.y - MSin * vec.z) * temporary[j].y) +
-						(((1 - MCos) * vec.x * vec.z + MSin * vec.y) * temporary[j].z);
-
-					double y = (((1 - MCos) * vec.y * vec.x + MSin * vec.z) * temporary[j].x) +
-						((MCos + (1 - MCos) * pow(vec.y, 2)) * temporary[j].y) +
-						((1 - MCos) * vec.y * vec.z - MSin * vec.x) * temporary[j].z;
-
-					double z = (((1 - MCos) * vec.z * vec.x - MSin * vec.y) * temporary[j].x) +
-						(((1 - MCos) * vec.z * vec.y + MSin * vec.x) * temporary[j].y) +
-						((MCos + (1 - MCos) * pow(vec.z, 2)) * temporary[j].z);
-
-					Dot3D G{};
-					G.x = x; G.y = y; G.z = z;
-					temporary1.push_back(G);
-				}
-				returned.push_back(temporary1);
-				temporary1.resize(0);
-			}
-			return returned;
-		}
-
 #pragma endregion
+
 		// Инициализация переменных
 	private: System::Void MyForm_Load(System::Object^ sender, System::EventArgs^ e) {
 		this->Draw2D = this->Box2D->CreateGraphics();
@@ -345,8 +297,8 @@ namespace My3DLab3 {
 		//Перенос 3D объекта в центр формы
 		for (int i = 0; i < Dots3D.size(); ++i) {
 			for (int j = 0; j < Dots3D[i].size(); ++j) {
-				Dots3D[i][j].x += this->Box3D->Width / 2;
-				Dots3D[i][j].y += this->Box3D->Height / 2;
+				Dots3D[i][j].x += this->Box3D->Width / 2.;
+				Dots3D[i][j].y += this->Box3D->Height / 2.;
 				// точки this->Draw3D->DrawEllipse(this->Pen2D, Dots3D[i][j].x - 3, Dots3D[i][j].y - 3, 6, 6);
 			}
 		}
@@ -366,12 +318,14 @@ namespace My3DLab3 {
 			}
 		}
 
-		double MCos = cos(3.1415926535 / 48.);
-		double MSin = sin(3.1415926535 / 48.);
+		double MCos = cos(3.1415926535 / 48);
+		double MSin = sin(3.1415926535 / 48);
 		for (int i = 0; i < Dots3D.size(); ++i) {
 			for (int j = 0; j < Dots3D[i].size(); ++j) {
-				Dots3D[i][j].y = MCos * Dots3D[i][j].y - MSin * Dots3D[i][j].z;
-				Dots3D[i][j].z = MSin * Dots3D[i][j].y + MCos * Dots3D[i][j].z;
+				double temp_y = MCos * Dots3D[i][j].y - MSin * Dots3D[i][j].z;
+				double temp_z = MSin * Dots3D[i][j].y + MCos * Dots3D[i][j].z;
+				Dots3D[i][j].y = temp_y;
+				Dots3D[i][j].z = temp_z;
 			}
 		}
 
@@ -398,13 +352,15 @@ namespace My3DLab3 {
 			}
 		}
 
-		double MCos = cos(3.1415926535 / 48.);
-		double MSin = sin(3.1415926535 / 48.);
+		double MCos = cos(3.1415926535 / 48);
+		double MSin = sin(3.1415926535 / 48);
 
 		for (int i = 0; i < Dots3D.size(); ++i) {
 			for (int j = 0; j < Dots3D[i].size(); ++j) {
-				Dots3D[i][j].x = MCos * Dots3D[i][j].x + MSin * Dots3D[i][j].z;
-				Dots3D[i][j].z = -MSin * Dots3D[i][j].x + MCos * Dots3D[i][j].z;
+				double temp_x = MCos * Dots3D[i][j].x + MSin * Dots3D[i][j].z;
+				double temp_z = -MSin * Dots3D[i][j].x + MCos * Dots3D[i][j].z;
+				Dots3D[i][j].x = temp_x;
+				Dots3D[i][j].z = temp_z;
 			}
 		}
 
@@ -447,7 +403,6 @@ namespace My3DLab3 {
 				Dots3D[i][j].y += t_y;
 			}
 		}
-
 		Draw3DFunc(Dots3D);
 	}
 	private: System::Void button4_Click(System::Object^ sender, System::EventArgs^ e) {
@@ -481,5 +436,58 @@ namespace My3DLab3 {
 
 		Draw3DFunc(Dots3D);
 	}
-	};
+	private: System::Void timer1_Tick(System::Object^ sender, System::EventArgs^ e) {
+		double t_x, t_y;
+		t_x = (Dots3D[0][0].x + Dots3D[0][Dots2D.size() - 1.].x) / 2.;
+		t_y = (Dots3D[0][0].y + Dots3D[0][Dots2D.size() - 1.].y) / 2.;
+
+		for (int i = 0; i < Dots3D.size(); ++i) {
+			for (int j = 0; j < Dots3D[i].size(); ++j) {
+				Dots3D[i][j].x -= t_x;
+				Dots3D[i][j].y -= t_y;
+			}
+		}
+
+		double MCos = cos(3.1415926535 / 96);
+		double MSin = sin(3.1415926535 / 96);
+
+		for (int i = 0; i < Dots3D.size(); ++i) {
+			for (int j = 0; j < Dots3D[i].size(); ++j) {
+				double temp_x = MCos * Dots3D[i][j].x + MSin * Dots3D[i][j].z;
+				double temp_z = -MSin * Dots3D[i][j].x + MCos * Dots3D[i][j].z;
+				Dots3D[i][j].x = temp_x;
+				Dots3D[i][j].z = temp_z;
+
+				double temp_y = MCos * Dots3D[i][j].y - MSin * Dots3D[i][j].z;
+				temp_z = MSin * Dots3D[i][j].y + MCos * Dots3D[i][j].z;
+				Dots3D[i][j].y = temp_y;
+				Dots3D[i][j].z = temp_z;
+			}
+		}
+
+		Draw3D->Clear(Color::WhiteSmoke);
+
+		for (int i = 0; i < Dots3D.size(); ++i) {
+			for (int j = 0; j < Dots3D[i].size(); ++j) {
+				Dots3D[i][j].x += t_x;
+				Dots3D[i][j].y += t_y;
+			}
+		}
+
+		Draw3DFunc(Dots3D);
+	}
+	private: System::Void button5_Click(System::Object^ sender, System::EventArgs^ e) {
+		switch (this->timer1->Enabled)
+		{
+			case false:
+				this->timer1->Enabled = true;
+				break;
+
+			case true:
+				this->timer1->Enabled = false;
+				break;
+
+		}
+	}
+};
 }
