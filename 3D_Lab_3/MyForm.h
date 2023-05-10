@@ -188,7 +188,7 @@ namespace My3DLab3 {
 			// 
 			// timer1
 			// 
-			this->timer1->Interval = 32;
+			this->timer1->Interval = 16;
 			this->timer1->Tick += gcnew System::EventHandler(this, &MyForm::timer1_Tick);
 			// 
 			// button5
@@ -234,16 +234,16 @@ namespace My3DLab3 {
 		Pen^ Pen2D;
 
 		Void Draw3DFunc(std::vector<std::vector<Dot3D>> Dots) {
-			std::vector<std::vector<Dot3D>> temp = Dots;
-			temp.push_back(Dots[0]);
+			array<PointF>^ points = gcnew array<PointF>(Dots.size() * Dots[0].size());
 			for (int i = 0; i < Dots.size(); ++i) {
-				for (int j = 0; j < Dots[i].size() - 1; ++j) {
-					//if (temp[i][j].z >= -5 && temp[i][j+1].z >= -5) {
-						this->Draw3D->DrawLine(Pen2D, int(temp[i][j].x), temp[i][j].y, temp[i][j + 1].x, temp[i][j + 1].y);
-						this->Draw3D->DrawLine(Pen2D, int(temp[i][j].x), temp[i][j].y, temp[i + 1][j].x, temp[i + 1][j].y);
-					//}
+				for (int j = 0; j < Dots[i].size(); ++j) {
+					points[j + i * Dots[i].size()].X = Dots[i][j].x;
+					points[j + i * Dots[i].size()].Y = Dots[i][j].y;
 				}
 			}
+			this->Draw3D->DrawLines(Pen2D, points);
+			this->Draw3D->DrawLines(Pen2D, points);
+			//Доделать соединение рёбер
 		};
 
 #pragma endregion
@@ -453,13 +453,8 @@ namespace My3DLab3 {
 
 		for (int i = 0; i < Dots3D.size(); ++i) {
 			for (int j = 0; j < Dots3D[i].size(); ++j) {
-				double temp_x = MCos * Dots3D[i][j].x + MSin * Dots3D[i][j].z;
-				double temp_z = -MSin * Dots3D[i][j].x + MCos * Dots3D[i][j].z;
-				Dots3D[i][j].x = temp_x;
-				Dots3D[i][j].z = temp_z;
-
 				double temp_y = MCos * Dots3D[i][j].y - MSin * Dots3D[i][j].z;
-				temp_z = MSin * Dots3D[i][j].y + MCos * Dots3D[i][j].z;
+				double temp_z = MSin * Dots3D[i][j].y + MCos * Dots3D[i][j].z;
 				Dots3D[i][j].y = temp_y;
 				Dots3D[i][j].z = temp_z;
 			}
