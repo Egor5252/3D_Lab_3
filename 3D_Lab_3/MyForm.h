@@ -233,18 +233,37 @@ namespace My3DLab3 {
 		Graphics^ Draw3D;
 		Pen^ Pen2D;
 
+		//Void Draw3DFunc(std::vector<std::vector<Dot3D>> Dots) {
+		//	array<PointF>^ points = gcnew array<PointF>(Dots.size() * Dots[0].size());
+		//	for (int i = 0; i < Dots.size(); ++i) {
+		//		for (int j = 0; j < Dots[i].size(); ++j) {
+		//			points[j + i * Dots[i].size()].X = Dots[i][j].x;
+		//			points[j + i * Dots[i].size()].Y = Dots[i][j].y;
+		//		}
+		//	}
+		//	this->Draw3D->DrawLines(Pen2D, points);
+		//	this->Draw3D->DrawLines(Pen2D, points);
+		//	//Доделать соединение рёбер
+		//};
+
 		Void Draw3DFunc(std::vector<std::vector<Dot3D>> Dots) {
 			array<PointF>^ points = gcnew array<PointF>(Dots.size() * Dots[0].size());
 			for (int i = 0; i < Dots.size(); ++i) {
-				for (int j = 0; j < Dots[i].size(); ++j) {
-					points[j + i * Dots[i].size()].X = Dots[i][j].x;
-					points[j + i * Dots[i].size()].Y = Dots[i][j].y;
+				if (i % 2 == 0 || true)
+				{
+					for (int j = 0; j < Dots[i].size(); ++j) 
+					{
+						points[j + i * Dots[i].size()].X = Dots[i][j].x;
+						points[j + i * Dots[i].size()].Y = Dots[i][j].y;
+					}
 				}
+				
 			}
-			this->Draw3D->DrawLines(Pen2D, points);
-			this->Draw3D->DrawLines(Pen2D, points);
 			//Доделать соединение рёбер
-		};
+
+			Draw3D->DrawLines(Pen2D, points);
+			Draw3D->DrawLines(Pen2D, points);
+		} // переделать
 
 #pragma endregion
 

@@ -1,6 +1,13 @@
 #pragma once
 #include<vector>
 
+using namespace System;
+using namespace System::ComponentModel;
+using namespace System::Collections;
+using namespace System::Windows::Forms;
+using namespace System::Data;
+using namespace System::Drawing;
+
 struct Dot2D {
 	double x, y;
 };
@@ -60,4 +67,4 @@ std::vector<std::vector<Dot3D>> Create3D(std::vector<Dot2D> Dots, int steps) {
 		temporary1.resize(0);
 	}
 	return returned;
-}
+};
