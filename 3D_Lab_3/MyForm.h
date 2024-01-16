@@ -248,21 +248,49 @@ namespace My3DLab3 {
 
 		Void Draw3DFunc(std::vector<std::vector<Dot3D>> Dots) {
 			array<PointF>^ points = gcnew array<PointF>(Dots.size() * Dots[0].size());
-			for (int i = 0; i < Dots.size(); ++i) {
-				if (i % 2 == 0 || true)
+			int count = 0;
+			for (int i = 0; i < Dots.size(); ++i) 
+			{
+				if (i % 2 == 0)
 				{
 					for (int j = 0; j < Dots[i].size(); ++j) 
 					{
-						points[j + i * Dots[i].size()].X = Dots[i][j].x;
-						points[j + i * Dots[i].size()].Y = Dots[i][j].y;
+						points[count].X = Dots[i][j].x;
+						points[count].Y = Dots[i][j].y;
+						count++;
 					}
 				}
-				
+				else
+				{
+					for (int j = Dots[i].size() - 1; j >= 0; --j)
+					{
+						points[count].X = Dots[i][j].x;
+						points[count].Y = Dots[i][j].y;
+						count++;
+					}
+				}
 			}
-			//Доделать соединение рёбер
+			count = 0;
+			int size = (Dots.size() * (Dots[0].size() - 2)) + Dots[0].size() - 2;
+			array<PointF>^ points_of_grani = gcnew array<PointF>(size);
+			for (int j = 1; j < Dots[0].size() - 1; ++j)
+			{
+				for (int i = 0; i < Dots.size(); ++i)
+				{
+					points_of_grani[count].X = Dots[i][j].x;
+					points_of_grani[count].Y = Dots[i][j].y;
+					count++;
+				}
+				points_of_grani[count].X = Dots[0][j].x;
+				points_of_grani[count].Y = Dots[0][j].y;
+				count++;
+			}
+			Draw3D->DrawLines(Pen2D, points);
+			Draw3D->DrawLines(Pen2D, points);
 
-			Draw3D->DrawLines(Pen2D, points);
-			Draw3D->DrawLines(Pen2D, points);
+			Draw3D->DrawLines(Pen2D, points_of_grani);
+			Draw3D->DrawLines(Pen2D, points_of_grani);
+
 		} // переделать
 
 #pragma endregion
@@ -467,8 +495,8 @@ namespace My3DLab3 {
 			}
 		}
 
-		double MCos = cos(3.1415926535 / 96);
-		double MSin = sin(3.1415926535 / 96);
+		double MCos = cos(3.1415926535 / 384);
+		double MSin = sin(3.1415926535 / 384);
 
 		for (int i = 0; i < Dots3D.size(); ++i) {
 			for (int j = 0; j < Dots3D[i].size(); ++j) {
