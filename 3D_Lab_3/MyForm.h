@@ -291,7 +291,7 @@ namespace My3DLab3 {
 			Draw3D->DrawLines(Pen2D, points_of_grani);
 			Draw3D->DrawLines(Pen2D, points_of_grani);
 
-		} // переделать
+		}
 
 #pragma endregion
 
